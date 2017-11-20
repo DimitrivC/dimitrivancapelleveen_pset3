@@ -1,11 +1,9 @@
 package com.example.dimitrivc.restaurant;
 
-import android.app.Application;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
@@ -24,49 +22,33 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 public class Main2Activity extends AppCompatActivity {
 
-    // VOOR GLOBAL V2
-    //Global g = Global.getInstance();
 
-    // global int als het kan hier al aanmaken zodat niet elke keer dat onCreate
-    // wordt aangeroepen deze weer op 0 gaat.
+    Integer orderCount = 0;
+    ArrayList<String> forOrders = new ArrayList<>();
+    Map<String, String> dictionary = new HashMap<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main2);
 
-        // VOOR GLOBAL V2  - dit is alleen voor ints nog.
-        //g.setTest(BuildConfig.VERSION_CODE);
-        //List<String> naam = g.getTest();
-
-        // VOOR SINGLETON
-        final Singleton orderList = Singleton.getInstance();
-            //
-
-        // VOOR SINGLETON (MOGELIJK OVERBODIG)
-        Singleton.getInstance().getArrayList();
-            //
-        // VOOR GLOBAL V2
-        //Global g = (Global)getApplication();
-        //int data=g.getData();
-        //TextView testGlobal = findViewById(R.id.textViewGlobal);
-        //testGlobal.setText(data);
+        final TextView ordercount = findViewById(R.id.textview_ordercount);
+        ordercount.setText(orderCount);
 
         // SHARED PREFS
-        loadFromSharedPreferences();
-
-        // VOOR GLOBAL INT:
-        // set textview op global int.
-
-        final Intent intent3 = new Intent(this, Main3Activity.class);
+        //loadFromSharedPreferences();
 
         final Intent intent = getIntent();
         final String namePosition = intent.getStringExtra("EXTRA_MESSAGE");
-        final TextView textView2 = findViewById(R.id.textView2);
+        final TextView textView2 = findViewById(R.id.textview_error);
 
         RequestQueue requestQueue = Volley.newRequestQueue(this);
         final ListView listViewMenu = findViewById(R.id.listView2);
@@ -74,7 +56,7 @@ public class Main2Activity extends AppCompatActivity {
         final List<String> listdata2 = new ArrayList<>();
 
         final ArrayAdapter<String> adapter2 =
-                new ArrayAdapter<String>(
+                new ArrayAdapter<>(
                         this,
                         android.R.layout.simple_list_item_1,
                         listdata2);
@@ -95,9 +77,8 @@ public class Main2Activity extends AppCompatActivity {
                                     if (namePosition.equals("entrees")) {
                                         if (jsonArray2.getJSONObject(i).getString("category").equals("entrees")) {
                                             listdata2.add(jsonArray2.getJSONObject(i).getString("name"));
-                                            // aan de Global list toevoegen: het id, en ook de name. Name als key,
-                                            // id als value. Dus een dict?
-
+                                            // aan de Global list toevoegen: het id, en ook de name. Name als key
+                                            dictionary.put(jsonArray2.getJSONObject(i).getString("name"), jsonArray2.getJSONObject(i).getString("id"));
                                         }
                                     }
                                     if (namePosition.equals("appetizers")) {
@@ -123,43 +104,22 @@ public class Main2Activity extends AppCompatActivity {
                 });
         requestQueue.add(jsonObjectRequest2);
 
-        ListView name = findViewById(R.id.listView2);
-
-
-        name.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+        listViewMenu.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position,
                                     long id) {
 
-                    // VOOR DE SINGLETON
-                //orderList.getInstance().getArrayList().add("x");
-                    //
-
-                    // zo krijg je de position, die gelijk is, als string, aan de name van het object:
-                    // (en voeg je die toe aan de intent, maar dat wil je niet per se)
                 String str =  parent.getAdapter().getItem(position).toString();
-                intent3.putExtra("Extra_message4", str);
 
-                // dit met de get(position) werkt! (maar, als je dan via andere intent naar 3 gaat, geeft het niet mee...)
-                // dus dat wat je via listdata... krijgt meegeven aan list.
-                intent3.putExtra("Extra_message3",listdata2.get(position).toString());
-                    //
+                String order_id = dictionary.get(str);
 
-                // die name check je dan in de global list, en dan neem je de id.
-                // die moet dan doorgegeven worden aan button method, via tweede global variable.
+                forOrders.add(order_id);
 
-                // alternatief: get long id. Want wat is dat? miss wel de id.
-                // dan hoef ik die enkel mee te geven aan button via global list.
-
-                // VOOR ORDER COUNT:
-                // global int++
-                // setTextview van global int op global int nieuwe waarde.
-
+                orderCount += 1;
+                ordercount.setText(orderCount);
+                
                 // SHAREDPREF
-                saveToSharedPreferences();
-
-                startActivity(intent3);
-
+                //saveToSharedPreferences();
             }
         });
 
@@ -167,52 +127,66 @@ public class Main2Activity extends AppCompatActivity {
     }
 
 
-    public void saveToSharedPreferences(){
-        // wordt aangeroepen als een item wordt aangeklikt.
-
-        // je kan multiple preferences hebben, zie site.
-
-        // hierin opslaan: shit van global variables: hoeveel orders en welke orders.
-
-        // shared preferences aanmaken: check
-        SharedPreferences prefs = this.getSharedPreferences("settings", this.MODE_PRIVATE);
-        // editor aanmaken om aanpassingen eraan te kunnen doen: check
-        SharedPreferences.Editor editor = prefs.edit();
-
-        editor.putString("key", value);
-        editor.putInt("key2", value);
-               
-        editor.apply();
-        // OF
-        editor.commit();
-
-    }
-
-    public void loadFromSharedPreferences(){
-         // wordt aangeroepen bij onCreate
-        SharedPreferences prefs = this.getSharedPreferences("settings", this.MODE_PRIVATE);
-
-        // null is default value, die moet je geven
-        String restoredValues = prefs.getString("key", null);
-
-        if (restoredValues != null){
-            nameTextView.setText(restoredValues);
-        }
-
-        // na de shared prefs even een textwindow maken hier die de orders geeft
-        // en elke keer dat een item wordt aangetikt er een bij opteld.
-
-    }
+//    public void saveToSharedPreferences(){
+//        // wordt aangeroepen als een item wordt aangeklikt.
+//
+//        // je kan multiple preferences hebben, zie site.
+//
+//        // shared preferences aanmaken: check
+//        SharedPreferences prefs = this.getSharedPreferences("settings", this.MODE_PRIVATE);
+//        // editor aanmaken om aanpassingen eraan te kunnen doen: check
+//        SharedPreferences.Editor editor = prefs.edit();
+//
+//        //editor.putArrayList("key_id_array_list", forOrders);
+//
+//
+//        //Set<String> set = myScores.getStringSet("key", null);
+//
+//        //Set the values
+//        Set<String> set = new HashSet<String>();
+//        set.addAll(forOrders);
+//        editor.putStringSet("key_ids", set);
+//
+//        editor.putInt("key_order_count", orderCount);
+//
+//
+//
+//        editor.apply();
+//        // OF
+//        editor.commit();
+//
+//    }
+//
+//    public void loadFromSharedPreferences(){
+//         // wordt aangeroepen bij onCreate
+//        TextView ordercount = findViewById(R.id.textview_ordercount);
+//        SharedPreferences prefs = this.getSharedPreferences("settings", this.MODE_PRIVATE);
+//
+//        // null is default value, die moet je geve
+//        String restoredOrderCount = prefs.getString("key_order_count", null);
+//
+////        ArrayList<String> arrayIdList = prefs.getArrayList("key_id_array_list", null);
+////
+////          if (arrayIdList != null) {
+////             forOrders.addAll(arrayIdList);
+////             {
+//
+//        Set<String> name = prefs.getStringSet("key_ids", null);
+//
+//        if (name != null) {
+//
+//        }
+//
+//        if (restoredOrderCount != null){
+//            ordercount.setText(restoredOrderCount);
+//        }
+//   }
 
     public void goToOrder(View view) {
 
         final Intent intent2 = new Intent(this, Main3Activity.class);
 
-        // VOOR SINGLETON
-        //intent2.putExtra("EXTRA_MESSAGE2", orderList.getInstance().getArrayList());
-            //
-
-        //intent2.putExtra("EXTRA_TEST", "bla");
+        intent2.putExtra("Extra_list", forOrders);
 
         // giving (global) list to intent: https://stackoverflow.com/questions/6543811/intent-putextra-list
         startActivity(intent2);

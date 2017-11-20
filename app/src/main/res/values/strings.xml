@@ -1,4 +1,5 @@
 <resources>
     <string name="app_name">Restaurant</string>
     <string name="Button">Go to your orders</string>
+    <string name="orderReady">You order will be ready in several minutes: </string>
 </resources>

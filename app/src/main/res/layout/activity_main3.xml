@@ -14,6 +14,13 @@
         android:text=""
         android:textAppearance="@style/TextAppearance.AppCompat.Display3" />
 
+    <TextView
+        android:id="@+id/OrderWillBeReady"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/orderReady"
+        android:textAppearance="@style/TextAppearance.AppCompat.Display3" />
+
     <ListView
         android:id="@+id/listView3"
         android:layout_width="match_parent"

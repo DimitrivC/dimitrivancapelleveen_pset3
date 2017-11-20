@@ -28,27 +28,14 @@ public class Main3Activity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main3);
 
-        // POST request for https://resto.mprog.nl/order (GET method not allowed)
-        // A POST to this endpoint with the collection of menu item id values will
-        // submit the order and will return a response with the estimated time before
-        // the order will be ready. The IDs you send need to be be contained with JSON
-        // data under the key, menuIds. When you parse the JSON, an estimate of the time
-        // before the order is ready will be under the key “preparation_time”.
-
         Intent intent = getIntent();
 
         final TextView textView3 = findViewById(R.id.textView);
         textView3.setText(intent.getStringExtra("Extra_message4"));
 
-        // uit intent krijg je collectie van id's.
-        // getting list from intent: https://stackoverflow.com/questions/6543811/intent-putextra-list
-
-        // nu maar even list aanmaken met twee id's.:
-        List<String> arrayList = new ArrayList<>();
-        arrayList.add("1");
-        arrayList.add("2");
-
         // { = object ; [ = array.
+
+        List<String> arrayList = intent.getStringArrayListExtra("Extra_list");
 
         JSONObject jsonObject = new JSONObject();
         JSONArray jsonArray = new JSONArray();
@@ -63,10 +50,6 @@ public class Main3Activity extends AppCompatActivity {
         } catch (JSONException e) {
             e.printStackTrace();
         }
-
-            //The IDs you send need to be be contained with JSON
-            // data under the key, menuIds. When you parse the JSON, an estimate of the time
-            // before the order is ready will be under the key “preparation_time”.
 
         final ListView listView3 = findViewById(R.id.listView3);
         final List<String> listdata3 = new ArrayList<>();
@@ -84,22 +67,11 @@ public class Main3Activity extends AppCompatActivity {
                 (Request.Method.POST, url, jsonObject, new Response.Listener<JSONObject>() {
                     @Override
                     public void onResponse(JSONObject response) {
-                        // werkt.
-                        textView3.setText(response.toString());
-                        //listdata3.add(response.toString());
-                        //listView3.setAdapter(adapter2);
+                        //textView3.setText(response.toString());
+
                         try {
 
-
-                        listdata3.add(response.getJSONArray("preparation_time").getString(1));
-
-                            // convert JSONObject to JSONArray
-//                            JSONArray jsonArray = response.getJSONArray("preparation_time");
-//                            if (jsonArray != null) {
-//                                for (int i = 0; i < jsonArray.length(); i++) {
-//                                    listdata3.add(jsonArray.getString(i));
-//                                }
-//                            }
+                        listdata3.add(response.getString("preparation_time"));
 
                             listView3.setAdapter(adapter2);
 
